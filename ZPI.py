@@ -29,62 +29,47 @@ def get_audio(chunk, channels, rate, record_time):
     record_time - czas nagrania"""
 
     format = pyaudio.paInt16
-    wave_output_filename1 = "output1.wav"
-    wave_output_filename2 = "output2.wav"
+    wave_output_filename = "output1.wav"
     p = pyaudio.PyAudio()
 
-    stream1 = p.open(format=format,
-                     channels=channels,
-                     rate=rate,
-                     input=True,
-                     frames_per_buffer=chunk,
-                     input_device_index=0)
-    stream2 = p.open(format=format,
-                     channels=channels,
-                     rate=rate,
-                     input=True,
-                     frames_per_buffer=chunk,
-                     input_device_index=1)
+    stream = p.open(format=format,
+                    channels=channels,
+                    rate=rate,
+                    input=True,
+                    frames_per_buffer=chunk,
+                    input_device_index=3)
 
-    frames1 = []
-    frames2 = []
+    frames = []
 
     for i in range(0, int(rate / chunk * record_time)):
-        data1 = stream1.read(chunk)
-        data2 = stream2.read(chunk)
-        frames1.append(data1)
-        frames2.append(data2)
+        data = stream.read(chunk)
+        frames.append(data)
 
-    stream1.stop_stream()
-    stream1.close()
-    stream2.stop_stream()
-    stream2.close()
+    stream.stop_stream()
+    stream.close()
     p.terminate()
 
-    wf = wave.open(wave_output_filename1, 'wb')
+    wf = wave.open(wave_output_filename, 'wb')
     wf.setnchannels(channels)
     wf.setsampwidth(p.get_sample_size(format))
     wf.setframerate(rate)
-    wf.writeframes(b''.join(frames1))
-    wf.close()
-
-    wf = wave.open(wave_output_filename2, 'wb')
-    wf.setnchannels(channels)
-    wf.setsampwidth(p.get_sample_size(format))
-    wf.setframerate(rate)
-    wf.writeframes(b''.join(frames2))
+    wf.writeframes(b''.join(frames))
     wf.close()
 
 
 for i in range(5):
-    get_audio(1024, 2, 44100, 1)
-    sample_rate1, data1 = read('output1.wav')
-    sample_rate2, data2 = read('output2.wav')
-    t = np.arange(0, data1.shape[0], 1)
+    get_audio(1024, 4, 44100, 1)
+    sample_rate, data = read('output1.wav')
+    data1 = data[:, :2]
+    data2 = data[:, 2:]
+    print(data1)
+    print('dupa')
+    print(data2)
 
+    t = np.arange(0, data1.shape[0], 1)
     fig, axes = plt.subplots(2, 1, figsize=(20, 6))
     axes[0].plot(t, data1)
     axes[1].plot(t, data2)
-    axes[0].set_ylabel("Sygnał 1", fontsize=14)
-    axes[1].set_ylabel("Sygnał 2", fontsize=14)
+    axes[0].set_ylabel("Sygnal 1", fontsize=14)
+    axes[1].set_ylabel("Sygnal 2", fontsize=14)
     plt.show()
