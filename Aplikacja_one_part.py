@@ -10,7 +10,64 @@ from scipy.optimize import root
 from numpy.random import uniform
 import pyaudio
 import wave
-from Wykrywanie_30s import lag_finder, fun ,get_audio
+
+def fun(x):
+    return [np.sqrt(np.abs((wx[1] - x[0]) ** 2 - (wy[1] - x[1]) ** 2)) - np.sqrt(np.abs((wx[0] - x[0]) ** 2
+            - (wy[0] - x[1]) ** 2)) - d[0], np.sqrt(np.abs((wx[2] - x[0]) ** 2 - (wy[2] - x[1]) ** 2))
+            - np.sqrt(np.abs((wx[0] - x[0]) ** 2 - (wy[0] - x[1]) ** 2)) - d[1]]
+
+def get_audio(chunk, channels, rate, record_time, indeks):
+    """Nagrywa dźwięk z mikrofonu
+    chunk - na ile próbek dzielimy sygnał
+    channels - liczba kanałów (stereo - 2)
+    rate - próbkowanie w Hz
+    record_time - czas nagrania"""
+
+    format = pyaudio.paInt16
+    wave_output_filename1 = "ZPI.wav"
+    p = pyaudio.PyAudio()
+
+    stream1 = p.open(format=format,
+                     channels=channels,
+                     rate=rate,
+                     input=True,
+                     frames_per_buffer=chunk,
+                     input_device_index=indeks)
+
+    frames1 = []
+
+    print("Recording")
+
+    for i in range(0, int(rate / chunk * record_time)):
+        data1 = stream1.read(chunk)
+        frames1.append(data1)
+
+    print("Recording ended")
+
+    stream1.stop_stream()
+    stream1.close()
+    p.terminate()
+
+    wf = wave.open(wave_output_filename1, 'wb')
+    wf.setnchannels(channels)
+    wf.setsampwidth(p.get_sample_size(format))
+    wf.setframerate(rate)
+    wf.writeframes(b''.join(frames1))
+    wf.close()
+
+def lag_finder(y1, y2, sr):
+    """Zwraca różnicę w przybyciu sygnału do mikrofonów w sekundach
+    y1 - sygnał z pierwszego mikrofonu
+    y2 - sygnał z drugiego mikrofonu
+    sr - ilość próbek"""
+
+    n = len(y1)
+    corr = signal.correlate(y2, y1, mode='same') / np.sqrt(signal.correlate(y1, y1, mode='same')[int(n/2)]
+                                                           * signal.correlate(y2, y2, mode='same')[int(n/2)])
+
+    delay_arr = np.linspace(-0.5*n/sr, 0.5*n/sr, n)
+    delay = delay_arr[np.argmax(corr)]
+    return delay
 
 global slownik, nazwy, indexy, wx, wy, data
 
@@ -30,9 +87,12 @@ print("nazwy: {}".format(nazwy))
 print("indexy: {}".format(indexy))
 
 
-root = Tk()
-root.title("coś")
-root.geometry("400x600")
+rootXD = Tk()
+rootXD.title("coś")
+rootXD.geometry("400x600")
+
+nazwa = Label(rootXD, text = "Mikrfonix 3000", font = ("Comic Sans MS", 44), padx = 15, pady = 15)
+nazwa.pack(anchor = "center")
 
 global save_this, save_this1, save_this2
 
@@ -45,7 +105,7 @@ save_this.set("wybierz mikrofon jeden")
 # save_this2 = StringVar()
 # save_this2.set("wybierz mikrofon trzy")
 
-drop = OptionMenu(root, save_this, *nazwy)
+drop = OptionMenu(rootXD, save_this, *nazwy)
 drop.pack(anchor = "center")
 
 # drop1 = OptionMenu(root, save_this1, *nazwy)
@@ -54,22 +114,40 @@ drop.pack(anchor = "center")
 # drop2 = OptionMenu(root, save_this2, *nazwy)
 # drop2.pack(anchor = "center")
 
-x_jeden = Entry(root)
+mikrofon_jeden_x = Label(rootXD, text = "mikrofon jeden - x", font = ("Comic Sans MS", 14), padx = 15, pady = 5)
+mikrofon_jeden_x.pack(anchor = 'center')
+
+x_jeden = Entry(rootXD)
 x_jeden.pack(anchor = "center")
 
-y_jeden = Entry(root)
+mikrofon_jeden_y = Label(rootXD, text = "mikrofon jeden - y", font = ("Comic Sans MS", 14), padx = 15, pady = 5)
+mikrofon_jeden_y.pack(anchor = 'center')
+
+y_jeden = Entry(rootXD)
 y_jeden.pack(anchor = "center")
 
-x_dwa = Entry(root)
+mikrofon_dwa_x = Label(rootXD, text = "mikrofon dwa - x", font = ("Comic Sans MS", 14), padx = 15, pady = 5)
+mikrofon_dwa_x.pack(anchor = 'center')
+
+x_dwa = Entry(rootXD)
 x_dwa.pack(anchor = "center")
 
-y_dwa = Entry(root)
+mikrofon_dwa_y = Label(rootXD, text = "mikrofon dwa - y", font = ("Comic Sans MS", 14), padx = 15, pady = 5)
+mikrofon_dwa_y.pack(anchor = 'center')
+
+y_dwa = Entry(rootXD)
 y_dwa.pack(anchor = "center")
 
-x_trzy = Entry(root)
+mikrofon_trzy_x = Label(rootXD, text = "mikrofon trzy - x", font = ("Comic Sans MS", 14), padx = 15, pady = 5)
+mikrofon_trzy_x.pack(anchor = 'center')
+
+x_trzy = Entry(rootXD)
 x_trzy.pack(anchor = "center")
 
-y_trzy = Entry(root)
+mikrofon_trzy_y = Label(rootXD, text = "mikrofon trzy - y", font = ("Comic Sans MS", 14), padx = 15, pady = 5)
+mikrofon_trzy_y.pack(anchor = 'center')
+
+y_trzy = Entry(rootXD)
 y_trzy.pack(anchor = "center")
 
 def dalej():
@@ -94,14 +172,18 @@ def dalej():
     print(wx)
     print(wy)
     
-    get_audio(1024, 6, 44100, 1, toto)
+    get_audio(1024, 6, 44100, 3, toto)
     sample_rate, data = read("ZPI.wav")
 
     data1 = data[:, :1]
     data2 = data[:, 2:3]
     data3 = data[:, 4:5]
+    
+    global d
     d = [lag_finder(data1, data2, data1.shape[0]), lag_finder(data1, data3, data1.shape[0]),
         lag_finder(data2, data3, data1.shape[0])]
+    
+    print(d)
 
     a = []
     b = []
@@ -155,13 +237,13 @@ def dalej():
         # plt.close('all')
     # graph()
 
-przycisk = Button(root, text = "dalej", command = dalej)
+przycisk = Button(rootXD, text = "dalej", command = dalej)
 przycisk.pack(anchor = "center")
 
 # przycisk2 = Button(root, text = "graf test", command = graph)
 # przycisk2.pack(anchor = S)
 
-root.mainloop()
+rootXD.mainloop()
 
 
 
