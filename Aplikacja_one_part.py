@@ -220,27 +220,28 @@ y_trzy.pack(anchor = "center")
 #     # root2.mainloop()
 #     return
 
-# def graph():
+def graph():
 
-#     plt.ioff()
-#     for i in range(0, 30):
-#         prices = np.random.normal(200000, 25000, 5000)
-#         name = 'fig' +str(i)+'.png'
-#         plt.savefig(name)
-#         time.sleep(1)
-#         plt.close(fig)
+    plt.ioff()
+    for i in range(0, 30):
+
+        prices = np.random.normal(200000, 25000, 5000)
+        name = 'fig' +str(i)+'.png'
+        plt.savefig(name)
+        time.sleep(1)
+        plt.close(fig)
         
-        # plt.figure(1)
-        # plt.hist(prices, 50)
-        # plt.show()
-        # time.sleep(1)
-        # plt.close('all')
-    # graph()
+        plt.figure(1)
+        plt.hist(prices, 50)
+        plt.show()
+        time.sleep(1)
+        plt.close('all')
+    graph()
 
 przycisk = Button(rootXD, text = "dalej", command = dalej)
 przycisk.pack(anchor = "center")
 
-# przycisk2 = Button(root, text = "graf test", command = graph)
-# przycisk2.pack(anchor = S)
+przycisk2 = Button(root, text = "graf test", command = graph)
+przycisk2.pack(anchor = S)
 
 rootXD.mainloop()
