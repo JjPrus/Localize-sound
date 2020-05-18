@@ -1,7 +1,5 @@
 from scipy.io.wavfile import read
 from scipy import signal
-from scipy.optimize import root
-from numpy.random import uniform
 import numpy as np
 import matplotlib.pyplot as plt
 import pyaudio
@@ -19,7 +17,7 @@ def lag_finder(y1, y2, sr):
                                                            * signal.correlate(y2, y2, mode='same')[int(n/2)])
 
     delay_arr = np.linspace(-0.5*n/sr, 0.5*n/sr, n)
-    delay = delay_arr[np.argmax(corr)]
+    delay = delay_arr[np.argmin(corr)]
     return delay
 
 
@@ -61,14 +59,16 @@ def get_audio(chunk, channels, rate, record_time):
 
 
 def fun(x):
-    return [np.sqrt(np.abs((wx[1] - x[0]) ** 2 - (wy[1] - x[1]) ** 2)) - np.sqrt(np.abs((wx[0] - x[0]) ** 2
-            - (wy[0] - x[1]) ** 2)) - d[0], np.sqrt(np.abs((wx[2] - x[0]) ** 2 - (wy[2] - x[1]) ** 2))
-            - np.sqrt(np.abs((wx[0] - x[0]) ** 2 - (wy[0] - x[1]) ** 2)) - d[1]]
+    f1 = np.sqrt(np.abs((wx[1] - x[0]) ** 2 - (wy[1] - x[1]) ** 2)) - np.sqrt(np.abs((wx[0] - x[0]) ** 2
+                                                                                     - (wy[0] - x[1]) ** 2)) - d[0]
+    f2 = np.sqrt(np.abs((wx[2] - x[0]) ** 2 - (wy[2] - x[1]) ** 2)) - np.sqrt(np.abs((wx[0] - x[0]) ** 2 -
+                                                                                     (wy[0] - x[1]) ** 2)) - d[1]
+    return [f1, f2]
 
 
 # Współrzędne mikrofonu
-wx = [-0.40,0,0.50]
-wy = [1,1,1]
+wx = [-0.40, 0, 0.50]
+wy = [0.9, 1, 1.1]
 
 sample_rate, data = read('dlugie.wav')
 '''t = np.arange(len(data))
@@ -79,29 +79,30 @@ plt.show()
 plt.plot(t,data[:,4:5])
 plt.show()'''
 
-for i in range(0,int(len(data)/sample_rate)):
+for i in range(0, int(len(data)/sample_rate)):
     data1 = data[i*sample_rate : (i+1)*sample_rate, :1]
     data2 = data[i*sample_rate : (i+1)*sample_rate, 2:3]
     data3 = data[i*sample_rate : (i+1)*sample_rate, 4:5]
 
-    d = [lag_finder(data1, data2, data1.shape[0]), lag_finder(data1, data3, data1.shape[0]),
-         lag_finder(data2, data3, data1.shape[0])]
+    d = [lag_finder(data1, data2, data1.shape[0]) * 0.3403, lag_finder(data1, data3, data1.shape[0]) * 0.3403,
+         lag_finder(data2, data3, data1.shape[0]) * 0.3403]
+    # print(i+1, d)
 
-    a = []
-    b = []
-    while len(a) < 10 and len(b) < 10:
-        sol = root(fun, np.array([uniform(-1, 1), uniform(-1, 1)]))
-        ai, bi = sol.x
-        if -5 < ai < 5 and -1 < bi < 1:
-            a.append(ai)
-            b.append(bi)
+    A = np.array([[wx[0] - wx[1], wy[0] - wy[1], d[0]],
+                  [wx[0] - wx[2], wy[0] - wy[2], d[1]]])
+    # Q, R = np.linalg.qr(A)
+    b1 = 0.5 * (wx[0] ** 2 - wx[1] ** 2 + wy[0] ** 2 - wy[1] ** 2 + d[0] ** 2)
+    b2 = 0.5 * (wx[0] ** 2 - wx[2] ** 2 + wy[0] ** 2 - wy[2] ** 2 + d[1] ** 2)
+    b = np.array([b1, b2]).T
+    x = np.linalg.pinv(A.T @ A) @ A.T @ b
+    # x = np.linalg.pinv(R) @ Q.T @ b
+    # d = Q.T @ b
+    # lsq = lsq_linear(A, b).x
 
-    print(a, b)
-    aa = np.mean(a)
-    bb = np.mean(b)
-    print(aa, bb)
+    # print(a, b)
+    # print(i+1, aa, bb)
 
-    plt.title(i)
-    plt.scatter(wx,wy)
-    plt.scatter(aa,bb)
+    plt.title(i+1)
+    plt.scatter(wx, wy)
+    plt.scatter(x[0], x[1])
     plt.show()
