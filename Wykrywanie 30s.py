@@ -17,8 +17,22 @@ def lag_finder(y1, y2, sr):
                                                            * signal.correlate(y2, y2, mode='same')[int(n/2)])
 
     delay_arr = np.linspace(-0.5*n/sr, 0.5*n/sr, n)
-    delay = delay_arr[np.argmin(corr)]
+    delay = delay_arr[np.argmax(corr)]
     return delay
+
+
+def gcc_phat(y1, y2, interp=16):
+    n = y1.shape[0] + y2.shape[0]
+    xi = np.fft.rfft(y1, n)
+    xj = np.fft.rfft(y2, n)
+
+    G = xi * np.conj(xj)
+    R = np.fft.irfft(G / np.abs(G), interp * n)
+
+    max_shift = int(interp * n / 2)
+    corr = np.concatenate((R[-max_shift:], R[:max_shift+1]))
+    shift = np.argmax(corr) - max_shift
+    return shift
 
 
 def get_audio(chunk, channels, rate, record_time):
@@ -68,41 +82,37 @@ def fun(x):
 
 # Współrzędne mikrofonu
 wx = [-0.40, 0, 0.50]
-wy = [0.9, 1, 1.1]
+wy = [1, 1, 1]
 
 sample_rate, data = read('dlugie.wav')
 '''t = np.arange(len(data))
-plt.plot(t,data[:,0:1])
+plt.plot(t,data[:,0:2])
 plt.show()
-plt.plot(t,data[:,2:3])
+plt.plot(t,data[:,2:4])
 plt.show()
-plt.plot(t,data[:,4:5])
+plt.plot(t,data[:,4:6])
 plt.show()'''
 
-for i in range(0, int(len(data)/sample_rate)):
-    data1 = data[i*sample_rate : (i+1)*sample_rate, :1]
-    data2 = data[i*sample_rate : (i+1)*sample_rate, 2:3]
-    data3 = data[i*sample_rate : (i+1)*sample_rate, 4:5]
+step = np.arange(3.0, int(len(data) / sample_rate), 0.25)
+for i in step:
+    data1 = data[int(i*sample_rate) : int((i+0.25)*sample_rate), :1]
+    data2 = data[int(i*sample_rate) : int((i+0.25)*sample_rate), 2:3]
+    data3 = data[int(i*sample_rate) : int((i+0.25)*sample_rate), 4:5]
 
     d = [lag_finder(data1, data2, data1.shape[0]) * 0.3403, lag_finder(data1, data3, data1.shape[0]) * 0.3403,
-         lag_finder(data2, data3, data1.shape[0]) * 0.3403]
-    # print(i+1, d)
+         lag_finder(data2, data3, data2.shape[0]) * 0.3403]
+    # d2 = [gcc_phat(data1, data2) * 0.3403, gcc_phat(data1, data3) * 0.3403]
+    # print(i, d2)
 
     A = np.array([[wx[0] - wx[1], wy[0] - wy[1], d[0]],
                   [wx[0] - wx[2], wy[0] - wy[2], d[1]]])
-    # Q, R = np.linalg.qr(A)
     b1 = 0.5 * (wx[0] ** 2 - wx[1] ** 2 + wy[0] ** 2 - wy[1] ** 2 + d[0] ** 2)
     b2 = 0.5 * (wx[0] ** 2 - wx[2] ** 2 + wy[0] ** 2 - wy[2] ** 2 + d[1] ** 2)
     b = np.array([b1, b2]).T
-    x = np.linalg.pinv(A.T @ A) @ A.T @ b
-    # x = np.linalg.pinv(R) @ Q.T @ b
-    # d = Q.T @ b
-    # lsq = lsq_linear(A, b).x
+    x = A.T @ np.linalg.inv(A @ A.T) @ b
+    # print(i, x[0], d)
 
-    # print(a, b)
-    # print(i+1, aa, bb)
-
-    plt.title(i+1)
+    plt.title(i)
     plt.scatter(wx, wy)
     plt.scatter(x[0], x[1])
     plt.show()
