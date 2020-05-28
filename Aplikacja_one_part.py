@@ -85,8 +85,8 @@ def dalej():
         #     toto2 = i
         #     print(toto2)
 
-    wx = [x_jeden.get(), x_dwa.get(), x_trzy.get()]
-    wy = [y_jeden.get(), y_dwa.get(), y_trzy.get()]
+    wx = [float(x_jeden.get()), float(x_dwa.get()), float(x_trzy.get())]
+    wy = [float(y_jeden.get()), float(y_dwa.get()), float(y_trzy.get())]
 
     print(wx)
     print(wy)
@@ -104,26 +104,59 @@ def dalej():
     
     print(d)
 
-    a = []
-    b = []
-    while len(a) < 10 and len(b) < 10:
-        sol = root(fun, np.array([uniform(-1, 1), uniform(-1, 1)]))
-        ai, bi = sol.x
-        if -5 < ai < 5 and -1 < bi < 1:
-            a.append(ai)
-            b.append(bi)
 
-    print(a, b)
-    aa = np.mean(a)
-    bb = np.mean(b)
-    print(aa, bb)
+    A = np.array([[wx[0] - wx[1], wy[0] - wy[1], d[0]],
+                    [wx[0] - wx[2], wy[0] - wy[2], d[1]]])
+    b1 = 0.5 * (wx[0] ** 2 - wx[1] ** 2 + wy[0] ** 2 - wy[1] ** 2 + d[0] ** 2)
+    b2 = 0.5 * (wx[0] ** 2 - wx[2] ** 2 + wy[0] ** 2 - wy[2] ** 2 + d[1] ** 2)
+    b = np.array([b1, b2]).T
+    # x = A.T @ np.linalg.inv(A @ A.T) @ b
+    x = np.linalg.inv(A.T @ A) @ A.T @ b
+
 
     plt.title(i)
     plt.scatter(wx,wy)
-    plt.scatter(aa,bb)
+    plt.scatter(x[0],x[1])
     plt.show()
 
     dalej()
+
+def graph():
+
+    def live_plotter(x_vec,y1_data,line1,identifier='',pause_time=0.1):
+        if line1==[]:
+            # this is the call to matplotlib that allows dynamic plotting
+            plt.ion()
+            fig = plt.figure(figsize=(13,6))
+            ax = fig.add_subplot(111)
+            # create a variable for the line so we can later update it
+            line1, = ax.scatter(x_vec,y1_data,'-o',alpha=0.8)       
+            #update plot label/title
+            plt.ylabel('Y Label')
+            plt.title('Title: {}'.format(identifier))
+            plt.show()
+        
+        # after the figure, axis, and line are created, we only need to update the y-data
+        line1.set_ydata(y1_data)
+        # adjust limits if new data goes beyond bounds
+        if np.min(y1_data)<=line1.axes.get_ylim()[0] or np.max(y1_data)>=line1.axes.get_ylim()[1]:
+            plt.ylim([np.min(y1_data)-np.std(y1_data),np.max(y1_data)+np.std(y1_data)])
+        # this pauses the data so the figure/axis can catch up - the amount of pause can be altered above
+        plt.pause(pause_time)
+        
+        # return line so we can update it again in the next iteration
+        return line1
+
+    size = 100
+    x_vec = np.linspace(0,1,size+1)[0:-1]
+    y_vec = np.random.randn(len(x_vec))
+    line1 = []
+
+    while True:
+        rand_val = np.random.randn(1)
+        y_vec[-1] = rand_val
+        line1 = live_plotter(x_vec[-3:-1],y_vec[-3:-1],line1)
+        y_vec = np.append(y_vec[1:],0.0)
 
 global slownik, nazwy, indexy, wx, wy, data
 
@@ -133,6 +166,7 @@ indexy = []
 wx = []
 wy = []
 
+# pobieranie danych o urządzeniach audio
 p = pyaudio.PyAudio()
 for i in range(p.get_device_count()):
     slownik['name{}'.format(i)] = p.get_device_info_by_index(i)['name']
@@ -220,28 +254,10 @@ y_trzy.pack(anchor = "center")
 #     # root2.mainloop()
 #     return
 
-def graph():
-
-    plt.ioff()
-    for i in range(0, 30):
-
-        prices = np.random.normal(200000, 25000, 5000)
-        name = 'fig' +str(i)+'.png'
-        plt.savefig(name)
-        time.sleep(1)
-        plt.close(fig)
-        
-        plt.figure(1)
-        plt.hist(prices, 50)
-        plt.show()
-        time.sleep(1)
-        plt.close('all')
-    graph()
-
 przycisk = Button(rootXD, text = "dalej", command = dalej)
 przycisk.pack(anchor = "center")
 
-przycisk2 = Button(root, text = "graf test", command = graph)
+przycisk2 = Button(rootXD, text = "graf test", command = graph)
 przycisk2.pack(anchor = S)
 
 rootXD.mainloop()

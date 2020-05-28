@@ -102,7 +102,9 @@ for i in step:
     d = [lag_finder(data1, data2, data1.shape[0]) * 0.3403, lag_finder(data1, data3, data1.shape[0]) * 0.3403,
          lag_finder(data2, data3, data2.shape[0]) * 0.3403]
     # d2 = [gcc_phat(data1, data2) * 0.3403, gcc_phat(data1, data3) * 0.3403]
+    print("dupa")
     # print(i, d2)
+    print("dupa2")
 
     A = np.array([[wx[0] - wx[1], wy[0] - wy[1], d[0]],
                   [wx[0] - wx[2], wy[0] - wy[2], d[1]]])
