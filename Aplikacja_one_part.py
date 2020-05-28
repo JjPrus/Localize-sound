@@ -130,7 +130,7 @@ def graph():
             fig = plt.figure(figsize=(13,6))
             ax = fig.add_subplot(111)
             # create a variable for the line so we can later update it
-            line1, = ax.scatter(x_vec,y1_data,'-o',alpha=0.8)       
+            line1, = ax.plot(x_vec,y1_data,'bo',alpha=0.8)       
             #update plot label/title
             plt.ylabel('Y Label')
             plt.title('Title: {}'.format(identifier))
@@ -155,7 +155,7 @@ def graph():
     while True:
         rand_val = np.random.randn(1)
         y_vec[-1] = rand_val
-        line1 = live_plotter(x_vec[-3:-1],y_vec[-3:-1],line1)
+        line1 = live_plotter(x_vec[-4:-1],y_vec[-4:-1],line1)
         y_vec = np.append(y_vec[1:],0.0)
 
 global slownik, nazwy, indexy, wx, wy, data
