@@ -69,6 +69,30 @@ def lag_finder(y1, y2, sr):
     delay = delay_arr[np.argmax(corr)]
     return delay
 
+def live_plotter(x_vec,y1_data,line1,identifier='',pause_time=0.1):
+        if line1==[]:
+            # this is the call to matplotlib that allows dynamic plotting
+            plt.ion()
+            fig = plt.figure(figsize=(13,6))
+            ax = fig.add_subplot(111)
+            # create a variable for the line so we can later update it
+            line1, = ax.plot(x_vec,y1_data,'bo',alpha=0.8)       
+            #update plot label/title
+            plt.ylabel('Y Label')
+            plt.title('Title: {}'.format(identifier))
+            plt.show()
+        
+        # after the figure, axis, and line are created, we only need to update the y-data
+        line1.set_ydata(y1_data)
+        # adjust limits if new data goes beyond bounds
+        if np.min(y1_data)<=line1.axes.get_ylim()[0] or np.max(y1_data)>=line1.axes.get_ylim()[1]:
+            plt.ylim([np.min(y1_data)-np.std(y1_data),np.max(y1_data)+np.std(y1_data)])
+        # this pauses the data so the figure/axis can catch up - the amount of pause can be altered above
+        plt.pause(pause_time)
+        
+        # return line so we can update it again in the next iteration
+        return line1
+
 def dalej():
     
     for i in range(len(nazwy)):
@@ -89,37 +113,39 @@ def dalej():
     wy = [float(y_jeden.get()), float(y_dwa.get()), float(y_trzy.get())]
 
     print(wx)
-    print(wy)
-    
-    get_audio(1024, 6, 44100, 3, toto)
-    sample_rate, data = read("ZPI.wav")
-
-    data1 = data[:, :1]
-    data2 = data[:, 2:3]
-    data3 = data[:, 4:5]
-    
+    print(wy)   
     global d
-    d = [lag_finder(data1, data2, data1.shape[0]), lag_finder(data1, data3, data1.shape[0]),
-        lag_finder(data2, data3, data1.shape[0])]
-    
-    print(d)
+    line1 = []
 
+    while True:
+        get_audio(1024, 6, 44100, 1, toto)
+        sample_rate, data = read("ZPI.wav")
 
-    A = np.array([[wx[0] - wx[1], wy[0] - wy[1], d[0]],
-                    [wx[0] - wx[2], wy[0] - wy[2], d[1]]])
-    b1 = 0.5 * (wx[0] ** 2 - wx[1] ** 2 + wy[0] ** 2 - wy[1] ** 2 + d[0] ** 2)
-    b2 = 0.5 * (wx[0] ** 2 - wx[2] ** 2 + wy[0] ** 2 - wy[2] ** 2 + d[1] ** 2)
-    b = np.array([b1, b2]).T
-    # x = A.T @ np.linalg.inv(A @ A.T) @ b
-    x = np.linalg.inv(A.T @ A) @ A.T @ b
+        data1 = data[:, :1]
+        data2 = data[:, 2:3]
+        data3 = data[:, 4:5]
 
+        d = [lag_finder(data1[33000:], data2[33000:], data1.shape[0]) * 0.3403, lag_finder(data1[33000:], data3[33000:], data1.shape[0]) * 0.3403,
+            lag_finder(data2[33000:], data3[33000:], data1.shape[0]) * 0.3403]
 
-    plt.title(i)
-    plt.scatter(wx,wy)
-    plt.scatter(x[0],x[1])
-    plt.show()
+        print(d)
 
-    dalej()
+        A = np.array([[wx[0] - wx[1], wy[0] - wy[1], d[0]],
+                        [wx[0] - wx[2], wy[0] - wy[2], d[1]]])
+        b1 = 0.5 * (wx[0] ** 2 - wx[1] ** 2 + wy[0] ** 2 - wy[1] ** 2 + d[0] ** 2)
+        b2 = 0.5 * (wx[0] ** 2 - wx[2] ** 2 + wy[0] ** 2 - wy[2] ** 2 + d[1] ** 2)
+        b = np.array([b1, b2]).T
+        # x = A.T @ np.linalg.inv(A @ A.T) @ b
+        try:
+            x = np.linalg.inv(A.T @ A) @ A.T @ b
+        except np.linalg.LinAlgError as err:
+            if 'Singular matrix' in str(err):
+                x = A.T @ np.linalg.inv(A @ A.T) @ b
+        x_val = [wx[0],wx[1],wx[2], x[0]]
+        y_val = [wy[0],wy[1],wy[2], x[1]]
+        print(x_val)
+        print(y_val)
+        line1 = live_plotter(x_val,y_val,line1)
 
 def graph():
 
