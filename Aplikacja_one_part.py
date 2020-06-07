@@ -127,13 +127,13 @@ def dalej():
         data1 = data[:, :1]
         data2 = data[:, 2:3]
         data3 = data[:, 4:5]
-        plt.figure(0)
-        plt.plot(data1)
-        plt.figure(1)
-        plt.plot(data2)
-        plt.figure(2)
-        plt.plot(data3)        
-        plt.show()
+        # plt.figure(0)
+        # plt.plot(data1)
+        # plt.figure(1)
+        # plt.plot(data2)
+        # plt.figure(2)
+        # plt.plot(data3)        
+        # plt.show()
         d = [lag_finder(data1[33000:], data2[33000:], data1.shape[0]) * 0.3403, lag_finder(data1[33000:], data3[33000:], data1.shape[0]) * 0.3403,
             lag_finder(data2[33000:], data3[33000:], data1.shape[0]) * 0.3403]
 
