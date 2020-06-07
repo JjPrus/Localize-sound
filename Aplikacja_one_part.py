@@ -69,7 +69,7 @@ def lag_finder(y1, y2, sr):
     delay = delay_arr[np.argmax(corr)]
     return delay
 
-def live_plotter(x_vec,y1_data,line1,identifier='',pause_time=0.1):
+def live_plotter(x_vec,y1_data,line1,identifier='Mikrofonix',pause_time=0.01):
         if line1==[]:
             # this is the call to matplotlib that allows dynamic plotting
             plt.ion()
@@ -84,6 +84,7 @@ def live_plotter(x_vec,y1_data,line1,identifier='',pause_time=0.1):
         
         # after the figure, axis, and line are created, we only need to update the y-data
         line1.set_ydata(y1_data)
+        line1.set_xdata(x_vec)
         # adjust limits if new data goes beyond bounds
         if np.min(y1_data)<=line1.axes.get_ylim()[0] or np.max(y1_data)>=line1.axes.get_ylim()[1]:
             plt.ylim([np.min(y1_data)-np.std(y1_data),np.max(y1_data)+np.std(y1_data)])
@@ -116,15 +117,23 @@ def dalej():
     print(wy)   
     global d
     line1 = []
+    x_val = [wx[0],wx[1],wx[2],0.0]
+    y_val = [wy[0],wy[1],wy[2],0.0]
 
     while True:
-        get_audio(1024, 6, 44100, 1, toto)
+        get_audio(1024, 6, 44100, 3, toto)
         sample_rate, data = read("ZPI.wav")
 
         data1 = data[:, :1]
         data2 = data[:, 2:3]
         data3 = data[:, 4:5]
-
+        plt.figure(0)
+        plt.plot(data1)
+        plt.figure(1)
+        plt.plot(data2)
+        plt.figure(2)
+        plt.plot(data3)        
+        plt.show()
         d = [lag_finder(data1[33000:], data2[33000:], data1.shape[0]) * 0.3403, lag_finder(data1[33000:], data3[33000:], data1.shape[0]) * 0.3403,
             lag_finder(data2[33000:], data3[33000:], data1.shape[0]) * 0.3403]
 
@@ -141,8 +150,8 @@ def dalej():
         except np.linalg.LinAlgError as err:
             if 'Singular matrix' in str(err):
                 x = A.T @ np.linalg.inv(A @ A.T) @ b
-        x_val = [wx[0],wx[1],wx[2], x[0]]
-        y_val = [wy[0],wy[1],wy[2], x[1]]
+        x_val[-1] = x[0]
+        y_val[-1] = x[1]
         print(x_val)
         print(y_val)
         line1 = live_plotter(x_val,y_val,line1)
