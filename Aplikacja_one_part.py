@@ -121,21 +121,22 @@ def dalej():
     y_val = [wy[0],wy[1],wy[2],0.0]
 
     while True:
-        get_audio(1024, 6, 44100, 3, toto)
+        get_audio(1024, 6, 44100, 1, toto)
         sample_rate, data = read("ZPI.wav")
 
         data1 = data[:, :1]
         data2 = data[:, 2:3]
         data3 = data[:, 4:5]
         # plt.figure(0)
-        # plt.plot(data1)
+        # plt.plot(data1[34000:])
         # plt.figure(1)
-        # plt.plot(data2)
+        # plt.plot(data2[34000:])
         # plt.figure(2)
-        # plt.plot(data3)        
+        # plt.plot(data3[34000:])        
         # plt.show()
-        d = [lag_finder(data1[33000:], data2[33000:], data1.shape[0]) * 0.3403, lag_finder(data1[33000:], data3[33000:], data1.shape[0]) * 0.3403,
-            lag_finder(data2[33000:], data3[33000:], data1.shape[0]) * 0.3403]
+        # print(data1[34000:].shape)
+        d = [lag_finder(data1[34000:], data2[34000:], data1[34000:].shape[0]) * 0.3403, lag_finder(data1[34000:], data3[34000:], data1[34000:].shape[0]) * 0.3403,
+            lag_finder(data2[34000:], data3[34000:], data1[34000:].shape[0]) * 0.3403]
 
         print(d)
 
