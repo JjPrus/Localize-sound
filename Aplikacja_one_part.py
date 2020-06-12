@@ -10,6 +10,7 @@ from scipy.optimize import root
 from numpy.random import uniform
 import pyaudio
 import wave
+import pandas as pd
 
 def fun(x):
     return [np.sqrt(np.abs((wx[1] - x[0]) ** 2 - (wy[1] - x[1]) ** 2)) - np.sqrt(np.abs((wx[0] - x[0]) ** 2
