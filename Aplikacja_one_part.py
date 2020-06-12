@@ -135,6 +135,23 @@ def dalej():
         # plt.plot(data3[34000:])        
         # plt.show()
         # print(data1[34000:].shape)
+        
+        ts1 = np.concatenate(data1)
+        ts2 = np.concatenate(data2)
+        ts3 = np.concatenate(data3)
+
+        smooth1 = pd.Series(ts1).rolling(window=20).mean()
+        smooth2 = pd.Series(ts2).rolling(window=20).mean()
+        smooth3 = pd.Series(ts3).rolling(window=20).mean()
+
+        data1 = np.array(smooth1).reshape((data1.shape[0], 1))
+        data2 = np.array(smooth2).reshape((data2.shape[0], 1))
+        data3 = np.array(smooth3).reshape((data3.shape[0], 1))
+
+        data1 = data1[np.logical_not(np.isnan(data1))]
+        data2 = data2[np.logical_not(np.isnan(data2))]
+        data3 = data3[np.logical_not(np.isnan(data3))]
+        
         d = [lag_finder(data1[34000:], data2[34000:], data1[34000:].shape[0]) * 0.3403, lag_finder(data1[34000:], data3[34000:], data1[34000:].shape[0]) * 0.3403,
             lag_finder(data2[34000:], data3[34000:], data1[34000:].shape[0]) * 0.3403]
 
