@@ -33,19 +33,36 @@ plt.show()
 plt.plot(t,data[:,4:6])
 plt.show()'''
 
-step = np.arange(10.0, int(len(data) / sample_rate), 0.25)
+step = np.arange(3.0, int(len(data) / sample_rate), 0.25)
 for i in step:
     data1 = data[int(i*sample_rate) : int((i+0.25)*sample_rate), :1]
     data2 = data[int(i*sample_rate) : int((i+0.25)*sample_rate), 2:3]
     data3 = data[int(i*sample_rate) : int((i+0.25)*sample_rate), 4:5]
 
-    ts = np.concatenate(data1)
-    smooth = pd.Series(ts).rolling(window=20).mean()
-    data1 = np.array(smooth).reshape((data1.shape[0], 1))
-    print(smooth)
+    ts1 = np.concatenate(data1)
+    ts2 = np.concatenate(data2)
+    ts3 = np.concatenate(data3)
 
-    d = [lag_finder(data1, data2, data1.shape[0]) * 0.3403, lag_finder(data1, data3, data1.shape[0]) * 0.3403,
-         lag_finder(data2, data3, data2.shape[0]) * 0.3403]
+    smooth1 = pd.Series(ts1).rolling(window=20).mean()
+    smooth2 = pd.Series(ts2).rolling(window=20).mean()
+    smooth3 = pd.Series(ts3).rolling(window=20).mean()
+
+    data1 = np.array(smooth1).reshape((data1.shape[0], 1))
+    data2 = np.array(smooth2).reshape((data2.shape[0], 1))
+    data3 = np.array(smooth3).reshape((data3.shape[0], 1))
+
+    data1 = data1[np.logical_not(np.isnan(data1))]
+    data2 = data2[np.logical_not(np.isnan(data2))]
+    data3 = data3[np.logical_not(np.isnan(data3))]
+    plt.plot(data1)
+    plt.show()
+    plt.plot(data2)
+    plt.show()
+    plt.plot(data3)
+    plt.show()
+
+    d = [lag_finder(data1, data2, data1.shape[0]) * 0.3, lag_finder(data1, data3, data1.shape[0]) * 0.3,
+         lag_finder(data2, data3, data2.shape[0]) * 0.3]
 
     A = np.array([[wx[0] - wx[1], wy[0] - wy[1], d[0]],
                   [wx[0] - wx[2], wy[0] - wy[2], d[1]]])
