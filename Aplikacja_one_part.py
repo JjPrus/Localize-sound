@@ -11,6 +11,8 @@ from numpy.random import uniform
 import pyaudio
 import wave
 import pandas as pd
+from scipy.signal import butter, lfilter
+
 
 def fun(x):
     return [np.sqrt(np.abs((wx[1] - x[0]) ** 2 - (wy[1] - x[1]) ** 2)) - np.sqrt(np.abs((wx[0] - x[0]) ** 2
@@ -79,7 +81,8 @@ def live_plotter(x_vec,y1_data,line1,identifier='Mikrofonix',pause_time=0.01):
             # create a variable for the line so we can later update it
             line1, = ax.plot(x_vec,y1_data,'bo',alpha=0.8)       
             #update plot label/title
-            plt.ylabel('Y Label')
+            plt.ylabel('Y')
+            plt.xlabel('X')
             plt.title('Title: {}'.format(identifier))
             plt.show()
         
@@ -94,6 +97,18 @@ def live_plotter(x_vec,y1_data,line1,identifier='Mikrofonix',pause_time=0.01):
         
         # return line so we can update it again in the next iteration
         return line1
+
+def butter_bandpass(lowcut, highcut, fs, order=5):
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = butter(order, [low, high], btype='band')
+    return b, a
+
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
+    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+    y = lfilter(b, a, data)
+    return y
 
 def dalej():
     
@@ -152,6 +167,53 @@ def dalej():
         data1 = data1[np.logical_not(np.isnan(data1))]
         data2 = data2[np.logical_not(np.isnan(data2))]
         data3 = data3[np.logical_not(np.isnan(data3))]
+
+#wykres 1
+        fs = 5000.0
+        lowcut = 100.0
+        highcut = 2000.0
+
+        # t = np.linspace(0, data1.shape[0], 1321965, endpoint=False)
+        # ta duza liczba to ilosc jednostek w calym nagraniu. czyli jest 44100 * dlugosc nagrania
+        # f0 = 600.0
+        # plt.figure(2)
+        # plt.clf()
+        # plt.plot(t, data1, label='Noisy signal')
+
+        # data1 = butter_bandpass_filter(data1, lowcut, highcut, fs, order=6) totototototto
+        # plt.plot(t, data1, label='Filtered signal (%g Hz)' % f0)
+        # plt.xlabel('time (seconds)')
+        # plt.axis('tight')
+        # plt.legend(loc='upper left')
+#wykres 2
+        lowcut = 75.0
+        highcut = 2000.0
+        # t = np.linspace(0, data2.shape[0], 1321965, endpoint=False)
+        # plt.figure(3)
+        # plt.clf()
+        # plt.plot(t, data2, label='Noisy signal')
+
+        # data2 = butter_bandpass_filter(data2, lowcut, highcut, fs, order=6) totototototto
+        # plt.plot(t, data2, label='Filtered signal (%g Hz)' % f0)
+        # plt.xlabel('time (seconds)')
+        # plt.axis('tight')
+        # plt.legend(loc='upper left')
+#wykres 3
+        lowcut = 50.0
+        highcut = 2000.0
+        # t = np.linspace(0, data3.shape[0], 1321965, endpoint=False)
+        # plt.figure(4)
+        # plt.clf()
+        # plt.plot(t, data3, label='Noisy signal')
+
+        # data3 = butter_bandpass_filter(data3, lowcut, highcut, fs, order=6) totototototto
+        # plt.plot(t, data3, label='Filtered signal (%g Hz)' % f0)
+        # plt.xlabel('time (seconds)')
+        # plt.axis('tight')
+        # plt.legend(loc='upper left')
+
+        # plt.show()
+
         
         d = [lag_finder(data1[34000:], data2[34000:], data1[34000:].shape[0]) * 0.3403, lag_finder(data1[34000:], data3[34000:], data1[34000:].shape[0]) * 0.3403,
             lag_finder(data2[34000:], data3[34000:], data1[34000:].shape[0]) * 0.3403]
@@ -235,13 +297,13 @@ rootXD = Tk()
 rootXD.title("coś")
 rootXD.geometry("400x600")
 
-nazwa = Label(rootXD, text = "Mikrfonix 3000", font = ("Comic Sans MS", 44), padx = 15, pady = 15)
+nazwa = Label(rootXD, text = "Mikrofonix 3000", font = ("Comic Sans MS", 44), padx = 15, pady = 15)
 nazwa.pack(anchor = "center")
 
 global save_this, save_this1, save_this2
 
 save_this = StringVar()
-save_this.set("wybierz mikrofon jeden")
+save_this.set("wybierz urządzenie")
 
 # save_this1 = StringVar()
 # save_this1.set("wybierz mikrofon dwa")
@@ -311,7 +373,7 @@ y_trzy.pack(anchor = "center")
 przycisk = Button(rootXD, text = "dalej", command = dalej)
 przycisk.pack(anchor = "center")
 
-przycisk2 = Button(rootXD, text = "graf test", command = graph)
-przycisk2.pack(anchor = S)
+# przycisk2 = Button(rootXD, text = "graf test", command = graph)
+# przycisk2.pack(anchor = S)
 
 rootXD.mainloop()
