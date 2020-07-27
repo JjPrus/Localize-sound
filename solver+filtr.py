@@ -130,6 +130,8 @@ def dalej():
         #     toto2 = i
         #     print(toto2)
 
+    global wx, wy
+
     wx = [float(x_jeden.get()), float(x_dwa.get()), float(x_trzy.get())]
     wy = [float(y_jeden.get()), float(y_dwa.get()), float(y_trzy.get())]
 
@@ -173,9 +175,9 @@ def dalej():
         data3 = data3[np.logical_not(np.isnan(data3))]
 
         # wykres 1
-        fs = 5000.0
-        lowcut = 100.0
-        highcut = 2000.0
+        # fs = 5000.0
+        # lowcut = 100.0
+        # highcut = 2000.0
 
         # t = np.linspace(0, data1.shape[0], 1321965, endpoint=False)
         # ta duza liczba to ilosc jednostek w calym nagraniu. czyli jest 44100 * dlugosc nagrania
@@ -190,8 +192,8 @@ def dalej():
         # plt.axis('tight')
         # plt.legend(loc='upper left')
         # wykres 2
-        lowcut = 75.0
-        highcut = 2000.0
+        # lowcut = 75.0
+        # highcut = 2000.0
         # t = np.linspace(0, data2.shape[0], 1321965, endpoint=False)
         # plt.figure(3)
         # plt.clf()
@@ -203,8 +205,8 @@ def dalej():
         # plt.axis('tight')
         # plt.legend(loc='upper left')
         # wykres 3
-        lowcut = 50.0
-        highcut = 2000.0
+        # lowcut = 50.0
+        # highcut = 2000.0
         # t = np.linspace(0, data3.shape[0], 1321965, endpoint=False)
         # plt.figure(4)
         # plt.clf()
@@ -236,9 +238,10 @@ def dalej():
 
         aa = np.mean(a)
         bb = np.mean(b)
+        x_val[-1] = aa
+        y_val[-1] = bb
 
-
-        line1 = live_plotter(aa, bb, line1)
+        line1 = live_plotter(x_val, y_val, line1)
 
 
 def graph():

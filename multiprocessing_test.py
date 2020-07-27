@@ -24,17 +24,15 @@ def get_audio(chunk, channels, rate, record_time, indeks, queue):
     record_time - czas nagrania"""
     i = 0
 
-    format = pyaudio.paInt16
-    p = pyaudio.PyAudio()
-
-    stream1 = p.open(format=format,
-                     channels=channels,
-                     rate=rate,
-                     input=True,
-                     frames_per_buffer=chunk,
-                     input_device_index=indeks)
-
     while True:
+        format = pyaudio.paInt16
+        p = pyaudio.PyAudio()
+        stream1 = p.open(format=format,
+                 channels=channels,
+                 rate=rate,
+                 input=True,
+                 frames_per_buffer=chunk,
+                 input_device_index=indeks)
         i =+ 1
         wave_output_filename1 = str(i%2)
 
@@ -48,6 +46,8 @@ def get_audio(chunk, channels, rate, record_time, indeks, queue):
 
         print("Recording ended")
 
+        stream1.stop_stream()
+        stream1.close()
         p.terminate()
 
         wf = wave.open(wave_output_filename1, 'wb')
@@ -187,8 +187,6 @@ def dalej():
         get_audio_process.start()
         obliczenia_process.start()
 
-        get_audio_process.join()
-        obliczenia_process.join()
 
 
 global slownik, nazwy, indexy, wx, wy, data

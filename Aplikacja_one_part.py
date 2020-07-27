@@ -19,6 +19,7 @@ def fun(x):
             - (wy[0] - x[1]) ** 2)) - d[0], np.sqrt(np.abs((wx[2] - x[0]) ** 2 - (wy[2] - x[1]) ** 2))
             - np.sqrt(np.abs((wx[0] - x[0]) ** 2 - (wy[0] - x[1]) ** 2)) - d[1]]
 
+
 def get_audio(chunk, channels, rate, record_time, indeks):
     """Nagrywa dźwięk z mikrofonu
     chunk - na ile próbek dzielimy sygnał
@@ -58,6 +59,7 @@ def get_audio(chunk, channels, rate, record_time, indeks):
     wf.writeframes(b''.join(frames1))
     wf.close()
 
+
 def lag_finder(y1, y2, sr):
     """Zwraca różnicę w przybyciu sygnału do mikrofonów w sekundach
     y1 - sygnał z pierwszego mikrofonu
@@ -71,6 +73,7 @@ def lag_finder(y1, y2, sr):
     delay_arr = np.linspace(-0.5*n/sr, 0.5*n/sr, n)
     delay = delay_arr[np.argmax(corr)]
     return delay
+
 
 def live_plotter(x_vec,y1_data,line1,identifier='Mikrofonix',pause_time=0.01):
         if line1==[]:
@@ -98,6 +101,7 @@ def live_plotter(x_vec,y1_data,line1,identifier='Mikrofonix',pause_time=0.01):
         # return line so we can update it again in the next iteration
         return line1
 
+
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
     low = lowcut / nyq
@@ -105,10 +109,12 @@ def butter_bandpass(lowcut, highcut, fs, order=5):
     b, a = butter(order, [low, high], btype='band')
     return b, a
 
+
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
     y = lfilter(b, a, data)
     return y
+
 
 def dalej():
     
@@ -117,14 +123,6 @@ def dalej():
             global toto
             toto = i
             print(toto)
-        # if save_this1.get() == nazwy[i]:
-        #     global toto1
-        #     toto1 = i
-        #     print(toto1)
-        # if save_this2.get() == nazwy[i]:
-        #     global toto2
-        #     toto2 = i
-        #     print(toto2)
 
     wx = [float(x_jeden.get()), float(x_dwa.get()), float(x_trzy.get())]
     wy = [float(y_jeden.get()), float(y_dwa.get()), float(y_trzy.get())]
@@ -137,20 +135,12 @@ def dalej():
     y_val = [wy[0],wy[1],wy[2],0.0]
 
     while True:
-        get_audio(1024, 6, 44100, 1, toto)
+        get_audio(1024, 6, 44100, 1.5, toto)
         sample_rate, data = read("ZPI.wav")
 
         data1 = data[:, :1]
         data2 = data[:, 2:3]
         data3 = data[:, 4:5]
-        # plt.figure(0)
-        # plt.plot(data1[34000:])
-        # plt.figure(1)
-        # plt.plot(data2[34000:])
-        # plt.figure(2)
-        # plt.plot(data3[34000:])        
-        # plt.show()
-        # print(data1[34000:].shape)
         
         ts1 = np.concatenate(data1)
         ts2 = np.concatenate(data2)
@@ -168,57 +158,46 @@ def dalej():
         data2 = data2[np.logical_not(np.isnan(data2))]
         data3 = data3[np.logical_not(np.isnan(data3))]
 
-#wykres 1
-        fs = 5000.0
-        lowcut = 100.0
-        highcut = 2000.0
+        # fs = 5000.0
+        # lowcut = 100.0
+        # highcut = 2000.0
 
-        # t = np.linspace(0, data1.shape[0], 1321965, endpoint=False)
-        # ta duza liczba to ilosc jednostek w calym nagraniu. czyli jest 44100 * dlugosc nagrania
+        # t = np.linspace(0, data1.shape[0], 88045, endpoint=False)
+        # # ta duza liczba to ilosc jednostek w calym nagraniu. czyli jest 44100 * dlugosc nagrania
         # f0 = 600.0
         # plt.figure(2)
         # plt.clf()
         # plt.plot(t, data1, label='Noisy signal')
 
-        # data1 = butter_bandpass_filter(data1, lowcut, highcut, fs, order=6) totototototto
+        # data1 = butter_bandpass_filter(data1, lowcut, highcut, fs, order=6) 
         # plt.plot(t, data1, label='Filtered signal (%g Hz)' % f0)
-        # plt.xlabel('time (seconds)')
-        # plt.axis('tight')
-        # plt.legend(loc='upper left')
-#wykres 2
-        lowcut = 75.0
-        highcut = 2000.0
-        # t = np.linspace(0, data2.shape[0], 1321965, endpoint=False)
-        # plt.figure(3)
-        # plt.clf()
-        # plt.plot(t, data2, label='Noisy signal')
-
-        # data2 = butter_bandpass_filter(data2, lowcut, highcut, fs, order=6) totototototto
-        # plt.plot(t, data2, label='Filtered signal (%g Hz)' % f0)
-        # plt.xlabel('time (seconds)')
-        # plt.axis('tight')
-        # plt.legend(loc='upper left')
-#wykres 3
-        lowcut = 50.0
-        highcut = 2000.0
-        # t = np.linspace(0, data3.shape[0], 1321965, endpoint=False)
-        # plt.figure(4)
-        # plt.clf()
-        # plt.plot(t, data3, label='Noisy signal')
-
-        # data3 = butter_bandpass_filter(data3, lowcut, highcut, fs, order=6) totototototto
-        # plt.plot(t, data3, label='Filtered signal (%g Hz)' % f0)
         # plt.xlabel('time (seconds)')
         # plt.axis('tight')
         # plt.legend(loc='upper left')
 
         # plt.show()
 
+        # lowcut = 75.0
+        # highcut = 2000.0
+
+        # data2 = butter_bandpass_filter(data2, lowcut, highcut, fs, order=6)
+
+        # lowcut = 50.0
+        # highcut = 2000.0
+
+        # data3 = butter_bandpass_filter(data3, lowcut, highcut, fs, order=6)
         
         d = [lag_finder(data1[34000:], data2[34000:], data1[34000:].shape[0]) * 0.3403, lag_finder(data1[34000:], data3[34000:], data1[34000:].shape[0]) * 0.3403,
             lag_finder(data2[34000:], data3[34000:], data1[34000:].shape[0]) * 0.3403]
 
         print(d)
+
+
+        # A = np.array([[wx[1] - wx[0], wy[1] - wy[0], d[0]],
+        #       [wx[2] - wx[0], wy[2] - wy[0], d[1]]])
+        # b1 = 0.5 * ((wx[1] - wx[0]) ** 2 + (wy[1] - wy[0]) ** 2 - d[0] ** 2)
+        # b2 = 0.5 * ((wx[2] - wx[0]) ** 2 + (wy[2] - wy[0]) ** 2 - d[1] ** 2)
+        # b = np.array([b1, b2]).T
 
         A = np.array([[wx[0] - wx[1], wy[0] - wy[1], d[0]],
                         [wx[0] - wx[2], wy[0] - wy[2], d[1]]])
@@ -231,48 +210,13 @@ def dalej():
         except np.linalg.LinAlgError as err:
             if 'Singular matrix' in str(err):
                 x = A.T @ np.linalg.inv(A @ A.T) @ b
+                print('dupa')
         x_val[-1] = x[0]
         y_val[-1] = x[1]
         print(x_val)
         print(y_val)
         line1 = live_plotter(x_val,y_val,line1)
 
-def graph():
-
-    def live_plotter(x_vec,y1_data,line1,identifier='',pause_time=0.1):
-        if line1==[]:
-            # this is the call to matplotlib that allows dynamic plotting
-            plt.ion()
-            fig = plt.figure(figsize=(13,6))
-            ax = fig.add_subplot(111)
-            # create a variable for the line so we can later update it
-            line1, = ax.plot(x_vec,y1_data,'bo',alpha=0.8)       
-            #update plot label/title
-            plt.ylabel('Y Label')
-            plt.title('Title: {}'.format(identifier))
-            plt.show()
-        
-        # after the figure, axis, and line are created, we only need to update the y-data
-        line1.set_ydata(y1_data)
-        # adjust limits if new data goes beyond bounds
-        if np.min(y1_data)<=line1.axes.get_ylim()[0] or np.max(y1_data)>=line1.axes.get_ylim()[1]:
-            plt.ylim([np.min(y1_data)-np.std(y1_data),np.max(y1_data)+np.std(y1_data)])
-        # this pauses the data so the figure/axis can catch up - the amount of pause can be altered above
-        plt.pause(pause_time)
-        
-        # return line so we can update it again in the next iteration
-        return line1
-
-    size = 100
-    x_vec = np.linspace(0,1,size+1)[0:-1]
-    y_vec = np.random.randn(len(x_vec))
-    line1 = []
-
-    while True:
-        rand_val = np.random.randn(1)
-        y_vec[-1] = rand_val
-        line1 = live_plotter(x_vec[-4:-1],y_vec[-4:-1],line1)
-        y_vec = np.append(y_vec[1:],0.0)
 
 global slownik, nazwy, indexy, wx, wy, data
 
@@ -292,7 +236,6 @@ for i in range(p.get_device_count()):
 print("nazwy: {}".format(nazwy))
 print("indexy: {}".format(indexy))
 
-
 rootXD = Tk()
 rootXD.title("coś")
 rootXD.geometry("400x600")
@@ -305,20 +248,8 @@ global save_this, save_this1, save_this2
 save_this = StringVar()
 save_this.set("wybierz urządzenie")
 
-# save_this1 = StringVar()
-# save_this1.set("wybierz mikrofon dwa")
-
-# save_this2 = StringVar()
-# save_this2.set("wybierz mikrofon trzy")
-
 drop = OptionMenu(rootXD, save_this, *nazwy)
 drop.pack(anchor = "center")
-
-# drop1 = OptionMenu(root, save_this1, *nazwy)
-# drop1.pack(anchor = "center")
-
-# drop2 = OptionMenu(root, save_this2, *nazwy)
-# drop2.pack(anchor = "center")
 
 mikrofon_jeden_x = Label(rootXD, text = "mikrofon jeden - x", font = ("Comic Sans MS", 14), padx = 15, pady = 5)
 mikrofon_jeden_x.pack(anchor = 'center')
@@ -356,24 +287,7 @@ mikrofon_trzy_y.pack(anchor = 'center')
 y_trzy = Entry(rootXD)
 y_trzy.pack(anchor = "center")
 
-#     # root2 = Tk()
-    
-#     # def time():
-#     #     string = strftime('%S')
-#     #     czas.config(text = string)
-#     #     czas.after(1000, time)
-
-#     # czas = Label(root2)
-#     # czas.pack(anchor = "center")
-#     # time()
-    
-#     # root2.mainloop()
-#     return
-
 przycisk = Button(rootXD, text = "dalej", command = dalej)
 przycisk.pack(anchor = "center")
-
-# przycisk2 = Button(rootXD, text = "graf test", command = graph)
-# przycisk2.pack(anchor = S)
 
 rootXD.mainloop()
